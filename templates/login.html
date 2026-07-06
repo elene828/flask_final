@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-4">
+        <div class="card p-4">
+            <h3 class="text-center text-success mb-4 fw-bold">სისტემაში შესვლა</h3>
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">მომხმარებლის სახელი</label>
+                    <input type="text" name="username" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">პაროლი</label>
+                    <input type="password" name="password" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100 fw-bold">შესვლა</button>
+            </form>
+            <div class="text-center mt-3">
+                <small class="text-muted">არ გაქვს ანგარიში? <a href="/register" class="text-success text-decoration-none">დარეგისტრირდი</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

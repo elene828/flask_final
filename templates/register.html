@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-4">
+        <div class="card p-4">
+            <h3 class="text-center text-success mb-4 fw-bold">რეგისტრაცია</h3>
+            <form action="/register" method="POST">
+                <div class="mb-2">
+                    <label class="form-label small">მომხმარებლის სახელი</label>
+                    <input type="text" name="username" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">ელ-ფოსტა</label>
+                    <input type="email" name="email" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">პაროლი</label>
+                    <input type="password" name="password" class="form-control bg-dark text-light border-secondary" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small">ძირითადი ვალუტა</label>
+                    <select name="currency" class="form-select bg-dark text-light border-secondary">
+                        <option value="GEL">GEL (₾)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success w-100 fw-bold">რეგისტრაცია</button>
+            </form>
+            <div class="text-center mt-3">
+                <small class="text-muted">უკვე გაქვს ანგარიში? <a href="/login" class="text-success text-decoration-none">შედი სისტემაში</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
