@@ -14,6 +14,6 @@ class User(UserMixin, db.Model):
     is_admin=db.Column(db.Boolean,default=False)
 
     # კავშირები (Relationships)
-    categories = db.relationship('Category', backref='user', lazy=True)
-    transactions = db.relationship('Transaction', backref='user', lazy=True)
-    budgets = db.relationship('Budget', backref='user', lazy=True)
+    categories = db.relationship('Category', backref='user', lazy=True,cascade="all, delete-orphan")
+    transactions = db.relationship('Transaction', backref='user', lazy=True,cascade="all, delete-orphan")
+    budgets = db.relationship('Budget', backref='user', lazy=True,cascade="all, delete-orphan")

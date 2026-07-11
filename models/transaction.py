@@ -14,3 +14,4 @@ class Transaction(db.Model):
     
     # Soft Delete ფუნქციონალისთვის
     deleted_at = db.Column(db.DateTime, nullable=True)
+    

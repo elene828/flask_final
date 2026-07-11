@@ -17,7 +17,7 @@ finance_bp = Blueprint('finance', __name__)
 def add_transaction():
     category_id = request.form.get('category_id')
     tx_type = request.form.get('type') # 'income' ან 'expense'
-    amount = float(request.form.get('amount'))
+    amount = float(request.form.get('amount') or 0)
     date_str = request.form.get('date')
     description = request.form.get('description')
     
@@ -36,11 +36,12 @@ def add_transaction():
 
     # თუ ხარჯია, ვამოწმებთ ბიუჯეტის გადაცილებას
     if tx_type == 'expense':
-        budget_status = check_budget_status(current_user.id, category_id, date.strftime('%Y-%m'))
+        budget_status = check_budget_status(current_user.id, category_id, date)
         if budget_status['warning']:
             flash(f"გაფრთხილება! ამ კატეგორიის ბიუჯეტის {budget_status['percentage']}% უკვე ათვისებულია!", "warning")
 
     return redirect(url_for('dashboard.index'))
+    
 
 # Soft Delete ფუნქციონალი
 @finance_bp.route('/transaction/delete/<int:id>', methods=['POST'])

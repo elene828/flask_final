@@ -1,4 +1,3 @@
-# helpers.py
 from models.transaction import Transaction
 from models.budget import Budget
 from extensions import db
@@ -6,7 +5,36 @@ from datetime import datetime
 from functools import wraps
 from flask import redirect, url_for, flash, jsonify, request
 from flask_login import current_user
+from models.currency_cache import CurrencyCache
 
+def perform_conversion(amount, from_curr, to_curr):
+    if from_curr == to_curr:
+        return round(float(amount), 2)
+        
+    cache = CurrencyCache.get_valid_cache("GEL")
+    # თუ cache არ გვაქვს, გამოვიძახოთ CurrencyConverter რომ ახალი მონაცემები მივიღოთ
+    if not cache or not cache.rates_json:
+        from services import CurrencyConverter
+        rates = CurrencyConverter().get_rates()
+    else:
+        rates = cache.rates_json
+
+    print(f"DEBUG: Converting {amount} from {from_curr} to {to_curr}")
+    print(f"DEBUG: Using Rates: {rates}") # <--- ეს გამოიტანს ტერმინალში რეალურ კურსებს
+    
+    # ავიღოთ კურსები (თუ კლავი არ არსებობს, დავბეჭდოთ გაფრთხილება)
+    rate_from = float(rates.get(from_curr, 1.0))
+    rate_to = float(rates.get(to_curr, 1.0))
+    
+    if from_curr not in rates and from_curr != "GEL":
+        print(f"WARNING: {from_curr} not found in rates!")
+    if to_curr not in rates and to_curr != "GEL":
+        print(f"WARNING: {to_curr} not found in rates!")
+
+    amount_in_gel = amount / rate_from
+    final_amount = amount_in_gel * rate_to
+    
+    return round(final_amount, 2)
 # 1. ბიუჯეტის კონტროლის ფუნქცია
 def check_budget_status(user_id, category_id, target_date=None):
     if not target_date:

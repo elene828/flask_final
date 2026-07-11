@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="fa-solid fa-gear me-2"></i>პროფილის პარამეტრები
+                </div>
+                <div class="card-body">
+                    <!-- ფორმა აკითხავს ახალ ბლუპრინტს -->
+                    <form action="{{ url_for('settings.index') }}" method="POST">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">მომხმარებლის სახელი</label>
+                            <input type="text" name="username" class="form-control" value="{{ current_user.username }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">სისტემის ვალუტა</label>
+                            <select name="currency" class="form-select">
+                                <option value="GEL" {% if current_user.currency == 'GEL' %}selected{% endif %}>GEL (ლარი)</option>
+                                <option value="USD" {% if current_user.currency == 'USD' %}selected{% endif %}>USD (დოლარი)</option>
+                                <option value="EUR" {% if current_user.currency == 'EUR' %}selected{% endif %}>EUR (ევრო)</option>
+                                <option value="GBP" {% if current_user.currency == 'GBP' %}selected{% endif %}>GBP (გირვანქა სტერლინგი)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">ახალი პაროლი (დატოვეთ ცარიელი უცვლელად დასატოვებლად)</label>
+                            <input type="password" name="password" class="form-control" placeholder="******">
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold">ცვლილებების შენახვა</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

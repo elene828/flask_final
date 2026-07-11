@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- დამატების ფორმა -->
+        <div class="col-md-4">
+            <h5 class="mb-3">ახალი კატეგორია</h5>
+            <form action="{{ url_for('category.add_category') }}" method="POST" class="card p-3">
+                <input type="text" name="name" class="form-control mb-2" placeholder="სახელი" required>
+                <select name="type" class="form-select mb-2">
+                    <option value="expense">გასავალი</option>
+                    <option value="income">შემოსავალი</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">დამატება</button>
+            </form>
+        </div>
+
+        <!-- სია -->
+        <div class="col-md-8">
+            <h5 class="mb-3">ჩემი კატეგორიები</h5>
+            <table class="table table-sm table-bordered align-middle">
+                <thead>
+                    <tr><th>სახელი</th><th>ტიპი</th><th class="text-center">მოქმედება</th></tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.type }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#edit-{{ cat.id }}">რედაქტირება</button>
+                            <form action="{{ url_for('category.delete_category', id=cat.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('დარწმუნებული ხართ?')">წაშლა</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <!-- რედაქტირების მოდალი -->
+                    <div class="modal fade" id="edit-{{ cat.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <form action="{{ url_for('category.edit_category', id=cat.id) }}" method="POST" class="modal-content">
+                                <div class="modal-header"><h5 class="modal-title">რედაქტირება</h5></div>
+                                <div class="modal-body">
+                                    <input type="text" name="name" class="form-control mb-2" value="{{ cat.name }}" required>
+                                    <select name="type" class="form-select">
+                                        <option value="expense" {% if cat.type == 'expense' %}selected{% endif %}>გასავალი</option>
+                                        <option value="income" {% if cat.type == 'income' %}selected{% endif %}>შემოსავალი</option>
+                                    </select>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" data-bs-dismiss="modal">დახურვა</button>
+                                    <button type="submit" class="btn btn-primary">შენახვა</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr><td colspan="3" class="text-center">კატეგორიები არ არის.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

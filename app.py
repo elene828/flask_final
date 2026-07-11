@@ -6,6 +6,8 @@ from routes.auth import auth_bp
 from routes.dashboard import dashboard_bp
 from routes.finance import finance_bp
 from routes.admin import admin_bp
+from routes.settings import settings_bp  
+from routes.category import category_bp
 from models.user import User
 from routes.api import api_bp
 from flask import redirect, url_for,render_template
@@ -31,7 +33,8 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(finance_bp)
     app.register_blueprint(admin_bp)
-
+    app.register_blueprint(settings_bp)
+    app.register_blueprint(category_bp)
 
     # create_app()-ის შიგნით:
     @app.route('/')

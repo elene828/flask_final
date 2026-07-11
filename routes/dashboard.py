@@ -1,15 +1,16 @@
-# routes/dashboard.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from flask_login import current_user
-from helpers import custom_login_required,check_budget_status
+# მნიშვნელოვანია: იმპორტი ხდება აქედან:
+from helpers import custom_login_required, check_budget_status, perform_conversion
 from extensions import db
 from models.transaction import Transaction
 from models.category import Category
-from helpers import check_budget_status
 from datetime import datetime
 from services import TransactionService, CurrencyConverter
+from models.budget import Budget
 
 dashboard_bp = Blueprint('dashboard', __name__)
+
 
 @dashboard_bp.route('/dashboard', methods=['GET'])
 @custom_login_required
@@ -44,8 +45,7 @@ def index():
 
     # ტრანზაქციების დინამიური კონვერტაცია მომხმარებლის ვალუტაში საჩვენებლად
     for t in transactions:
-        tx_currency = getattr(t, 'currency', 'GEL') or 'GEL'
-        t.display_amount = converter.convert(t.amount, tx_currency, user_currency)
+        t.display_amount = perform_conversion(t.amount, "GEL", user_currency)
 
         if t.type == 'income':
             total_income += t.display_amount
@@ -95,12 +95,9 @@ def add_transaction():
         return redirect(url_for('dashboard.index'))
 
     amount = float(amount_raw)
-    user_currency = current_user.currency or "GEL"
-
+    user_currency = current_user.currency or "GEL"  
     # ვალუტის გადაყვანა აქაუნთის ბაზისურ ვალუტაში შენახვამდე
-    converter = CurrencyConverter()
-    final_amount = converter.convert(amount, tx_currency, user_currency)
-
+    final_amount = perform_conversion(amount, tx_currency, "GEL")
     tx_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else datetime.utcnow().date()
 
     new_tx = Transaction(
@@ -114,15 +111,16 @@ def add_transaction():
 
     db.session.add(new_tx)
     db.session.commit()
+    display_final = perform_conversion(amount, tx_currency, user_currency)
 
     if tx_type == 'expense':
         status = check_budget_status(current_user.id, int(category_id))
         if status.get("warning"):
             flash(f"⚠️ გაფრთხილება! ამ კატეგორიის ბიუჯეტის {status['percentage']}% უკვე ათვისებულია!", "warning")
         else:
-            flash(f'ხარჯი დაემატა! ({amount} {tx_currency} ➡️ {final_amount} {user_currency})', 'success')
+            flash(f'ხარჯი დაემატა! ({amount} {tx_currency} ➡️ {display_final} {user_currency})', 'success')
     else:
-        flash(f'შემოსავალი დაემატა! ({amount} {tx_currency} ➡️ {final_amount} {user_currency})', 'success')
+        flash(f'შემოსავალი დაემატა! ({amount} {tx_currency} ➡️ {display_final} {user_currency})', 'success')
 
     return redirect(url_for('dashboard.index'))
 
@@ -147,3 +145,37 @@ def export_csv():
         mimetype="text/csv",
         headers={"Content-disposition": f"attachment; filename=transactions_{current_user.username}.csv"}
     )
+@dashboard_bp.route('/transaction/edit/<int:id>', methods=['POST'])
+@custom_login_required
+def edit_transaction(id):
+    tx = Transaction.query.filter_by(id=id, user_id=current_user.id).first()
+    if not tx:
+        flash('ტრანზაქცია ვერ მოიძებნა.', 'danger')
+        return redirect(url_for('dashboard.index'))
+
+    category_id = request.form.get('category_id')
+    tx_type = request.form.get('type')
+    amount_raw = request.form.get('amount')
+    tx_currency = request.form.get('tx_currency', 'GEL')
+    date_str = request.form.get('date')
+    description = request.form.get('description')
+
+    if not category_id or not amount_raw:
+        flash('გთხოვთ შეავსოთ სავალდებულო ველები.', 'warning')
+        return redirect(url_for('dashboard.index'))
+
+    amount = float(amount_raw)
+    
+    # კონვერტაცია ბაზისურ ვალუტაში (GEL) შენახვამდე, ისევე როგორც დამატებისას
+    final_amount = perform_conversion(amount, tx_currency, "GEL")
+
+    # მონაცემების განახლება
+    tx.category_id = int(category_id)
+    tx.type = tx_type
+    tx.amount = final_amount
+    tx.date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else datetime.utcnow().date()
+    tx.description = description
+
+    db.session.commit()
+    flash('ტრანზაქცია წარმატებით განახლდა!', 'success')
+    return redirect(url_for('dashboard.index'))

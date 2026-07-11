@@ -141,15 +141,21 @@
           </select>
         </div>
         <div class="mb-2">
-          <label class="form-label small">კატეგორია</label>
+          <label class="form-label fw-bold">კატეგორია</label>
           <select
             name="category_id"
-            class="form-select bg-dark text-light border-secondary"
+            id="txCategorySelect"
+            class="form-select"
             required
           >
+            <option value="" disabled selected>აირჩიეთ კატეგორია</option>
             {% for cat in categories %}
             <option value="{{ cat.id }}">{{ cat.name }}</option>
             {% endfor %}
+            <!-- ➕ ახალი კატეგორიის ტრიგერი სულ ბოლოში -->
+            <option value="NEW_CATEGORY_TRIGGER" class="text-primary fw-bold">
+              ➕ ახალი კატეგორია...
+            </option>
           </select>
         </div>
         <div class="mb-2">
@@ -301,5 +307,53 @@
     </div>
   </div>
 </div>
+
+<!-- კატეგორიის სწრაფი დამატების ფანჯარა -->
+<div class="modal fade" id="quickCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-dark">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-plus me-1"></i>კატეგორიის დამატება</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('category.add_category') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">სახელწოდება</label>
+                        <input type="text" name="name" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">ტიპი</label>
+                        <select name="type" class="form-select form-select-sm" required>
+                            <option value="expense">გასავალი (ხარჯი)</option>
+                            <option value="income">შემოსავალი</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer py-1 bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">გაუქმება</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold">დამატება</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('txCategorySelect');
+    const modalEl = document.getElementById('quickCategoryModal');
+    
+    if (categorySelect && modalEl) {
+        const quickModal = new bootstrap.Modal(modalEl);
+        categorySelect.addEventListener('change', function() {
+            if (this.value === 'NEW_CATEGORY_TRIGGER') {
+                quickModal.show();
+                this.value = ''; // აბრუნებს სელექტს საწყის პოზიციაზე
+            }
+        });
+    }
+});
+</script>
 
 {% endblock %}
