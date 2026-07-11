@@ -1,9 +1,10 @@
-{% extends 'base.html' %} 
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <div class="row g-3 mb-4">
   <div class="col-md-4">
-    <div class="card p-3 text-white {% if balance >= 0 %}gradient-income{% else %}gradient-expense{% endif %}">
+    <div
+      class="card p-3 text-white {% if balance >= 0 %}gradient-income{% else %}gradient-expense{% endif %}"
+    >
       <h6 class="text-uppercase text-light opacity-75">მიმდინარე ბალანსი</h6>
       <h2 class="fw-bold m-0">
         {{ "%.2f"|format(balance) }} {{ user_currency }}
@@ -16,7 +17,9 @@
       <h6 class="text-uppercase text-muted">ბიუჯეტის ბეჯები (კატეგორიები)</h6>
       <div class="d-flex flex-wrap gap-1 mt-2">
         {% for cat_name, status in budget_badges.items() %}
-        <span class="badge {% if status.warning %}bg-danger text-white{% else %}bg-secondary text-light{% endif %} p-2">
+        <span
+          class="badge {% if status.warning %}bg-danger text-white{% else %}bg-secondary text-light{% endif %} p-2"
+        >
           {{ cat_name }}: {{ status.percentage }}%
         </span>
         {% else %}
@@ -33,9 +36,13 @@
       </h6>
       <ul class="list-unstyled m-0 pt-1">
         {% for name, amount in top_3 %}
-        <li class="d-flex justify-content-between border-bottom border-secondary py-1">
+        <li
+          class="d-flex justify-content-between border-bottom border-secondary py-1"
+        >
           <span>{{ name }}</span>
-          <span class="fw-bold text-danger">-{{ "%.2f"|format(amount) }} {{ user_currency }}</span>
+          <span class="fw-bold text-danger"
+            >-{{ "%.2f"|format(amount) }} {{ user_currency }}</span
+          >
         </li>
         {% else %}
         <small class="text-muted">მონაცემები არ არის</small>
@@ -49,7 +56,10 @@
   <form method="GET" action="/dashboard" class="row g-2 align-items-end">
     <div class="col-md-2">
       <label class="form-label small text-muted">ტიპი</label>
-      <select name="type" class="form-select form-select-sm bg-dark text-light border-secondary">
+      <select
+        name="type"
+        class="form-select form-select-sm bg-dark text-light border-secondary"
+      >
         <option value="">ყველა</option>
         <option value="income">შემოსავალი</option>
         <option value="expense">ხარჯი</option>
@@ -57,7 +67,10 @@
     </div>
     <div class="col-md-3">
       <label class="form-label small text-muted">კატეგორია</label>
-      <select name="category_id" class="form-select form-select-sm bg-dark text-light border-secondary">
+      <select
+        name="category_id"
+        class="form-select form-select-sm bg-dark text-light border-secondary"
+      >
         <option value="">ყველა კატეგორია</option>
         {% for cat in categories %}
         <option value="{{ cat.id }}">{{ cat.name }}</option>
@@ -66,17 +79,43 @@
     </div>
     <div class="col-md-2">
       <label class="form-label small text-muted">დან</label>
-      <input type="date" name="start_date" class="form-control form-control-sm bg-dark text-light border-secondary" />
+      <input
+        type="date"
+        name="start_date"
+        class="form-control form-control-sm bg-dark text-light border-secondary"
+      />
     </div>
     <div class="col-md-2">
       <label class="form-label small text-muted">მდე</label>
-      <input type="date" name="end_date" class="form-control form-control-sm bg-dark text-light border-secondary" />
+      <input
+        type="date"
+        name="end_date"
+        class="form-control form-control-sm bg-dark text-light border-secondary"
+      />
     </div>
     <div class="col-md-3 d-flex gap-2">
+      <!-- გაფილტვრის ღილაკი -->
       <button type="submit" class="btn btn-success btn-sm flex-grow-1 fw-bold">
         <i class="fa-solid fa-filter me-1"></i>გაფილტვრა
       </button>
-      <a href="/dashboard/export/csv" class="btn btn-outline-info btn-sm fw-bold">
+
+      <!-- ❌ ფილტრის გაუქმების ღილაკი (გამოჩნდება მხოლოდ მაშინ, თუ რამე გაფილტრულია) -->
+      {% if request.args.get('type') or request.args.get('category_id') or
+      request.args.get('start_date') or request.args.get('end_date') %}
+      <a
+        href="{{ url_for('dashboard.index') }}"
+        class="btn btn-secondary btn-sm fw-bold"
+        title="ფილტრის გასუფთავება"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </a>
+      {% endif %}
+
+      <!-- CSV ექსპორტის ღილაკი -->
+      <a
+        href="/dashboard/export/csv"
+        class="btn btn-outline-info btn-sm fw-bold"
+      >
         <i class="fa-solid fa-file-csv me-1"></i>CSV
       </a>
     </div>
@@ -92,14 +131,22 @@
       <form action="/transaction/add" method="POST">
         <div class="mb-2">
           <label class="form-label small">ტიპი</label>
-          <select name="type" class="form-select bg-dark text-light border-secondary" required>
+          <select
+            name="type"
+            class="form-select bg-dark text-light border-secondary"
+            required
+          >
             <option value="expense">ხარჯი</option>
             <option value="income">შემოსავალი</option>
           </select>
         </div>
         <div class="mb-2">
           <label class="form-label small">კატეგორია</label>
-          <select name="category_id" class="form-select bg-dark text-light border-secondary" required>
+          <select
+            name="category_id"
+            class="form-select bg-dark text-light border-secondary"
+            required
+          >
             {% for cat in categories %}
             <option value="{{ cat.id }}">{{ cat.name }}</option>
             {% endfor %}
@@ -108,8 +155,19 @@
         <div class="mb-2">
           <label class="form-label small">თანხა და ვალუტა</label>
           <div class="input-group">
-            <input type="number" step="0.01" name="amount" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required />
-            <select name="tx_currency" class="form-select bg-dark text-light border-secondary" style="max-width: 100px;">
+            <input
+              type="number"
+              step="0.01"
+              name="amount"
+              class="form-control bg-dark text-light border-secondary"
+              placeholder="0.00"
+              required
+            />
+            <select
+              name="tx_currency"
+              class="form-select bg-dark text-light border-secondary"
+              style="max-width: 100px"
+            >
               <option value="GEL">GEL (₾)</option>
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
@@ -119,11 +177,19 @@
         </div>
         <div class="mb-2">
           <label class="form-label small">თარიღი</label>
-          <input type="date" name="date" class="form-control bg-dark text-light border-secondary" />
+          <input
+            type="date"
+            name="date"
+            class="form-control bg-dark text-light border-secondary"
+          />
         </div>
         <div class="mb-3">
           <label class="form-label small">შენიშვნა</label>
-          <input type="text" name="description" class="form-control bg-dark text-light border-secondary" />
+          <input
+            type="text"
+            name="description"
+            class="form-control bg-dark text-light border-secondary"
+          />
         </div>
         <button type="submit" class="btn btn-success w-100 fw-bold">
           დამატება
@@ -153,18 +219,28 @@
             <tr class="border-secondary">
               <td class="small">{{ tx.date.strftime('%Y-%m-%d') }}</td>
               <td>
-                <span class="badge bg-opacity-25 p-2" style="background-color: {{ tx.category.color }}; color: #fff;">
+                <span
+                  class="badge bg-opacity-25 p-2"
+                  style="background-color: {{ tx.category.color }}; color: #fff;"
+                >
                   {{ tx.category.name }}
                 </span>
               </td>
               <td class="text-truncate" style="max-width: 150px">
                 {{ tx.description or '-' }}
               </td>
-              <td class="fw-bold {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}">
-                {% if tx.type == 'income' %}+{% else %}-{% endif %}{{ "%.2f"|format(tx.display_amount) }} {{ user_currency }}
+              <td
+                class="fw-bold {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}"
+              >
+                {% if tx.type == 'income' %}+{% else %}-{% endif %}{{
+                "%.2f"|format(tx.display_amount) }} {{ user_currency }}
               </td>
               <td class="text-center">
-                <form action="/transaction/delete/{{ tx.id }}" method="POST" onsubmit="return confirm('დარწმუნებული ხარ?');">
+                <form
+                  action="/transaction/delete/{{ tx.id }}"
+                  method="POST"
+                  onsubmit="return confirm('დარწმუნებული ხარ?');"
+                >
                   <button type="submit" class="btn btn-link text-danger p-0">
                     <i class="fa-solid fa-trash-can"></i>
                   </button>
@@ -181,6 +257,47 @@
           </tbody>
         </table>
       </div>
+      {% if pagination and pagination.pages > 1 %}
+      <nav class="mt-3">
+        <ul class="pagination pagination-sm justify-content-center m-0">
+          <li
+            class="page-item {% if not pagination.has_prev %}disabled{% endif %}"
+          >
+            <a
+              class="page-num bg-dark text-light border-secondary page-link"
+              href="{{ url_for('dashboard.index', page=pagination.prev_num, type=request.args.get('type'), category_id=request.args.get('category_id'), start_date=request.args.get('start_date'), end_date=request.args.get('end_date')) }}"
+              >უკან</a
+            >
+          </li>
+
+          {% for p in pagination.iter_pages() %} {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a
+              class="page-num {% if p == pagination.page %}bg-success border-success text-white{% else %}bg-dark text-light border-secondary{% endif %} page-link"
+              href="{{ url_for('dashboard.index', page=p, type=request.args.get('type'), category_id=request.args.get('category_id'), start_date=request.args.get('start_date'), end_date=request.args.get('end_date')) }}"
+              >{{ p }}</a
+            >
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link bg-dark text-light border-secondary"
+              >...</span
+            >
+          </li>
+          {% endif %} {% endfor %}
+
+          <li
+            class="page-item {% if not pagination.has_next %}disabled{% endif %}"
+          >
+            <a
+              class="page-num bg-dark text-light border-secondary page-link"
+              href="{{ url_for('dashboard.index', page=pagination.next_num, type=request.args.get('type'), category_id=request.args.get('category_id'), start_date=request.args.get('start_date'), end_date=request.args.get('end_date')) }}"
+              >წინ</a
+            >
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
     </div>
   </div>
 </div>

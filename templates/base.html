@@ -21,7 +21,17 @@
             <a class="navbar-brand text-success fw-bold" href="#"><i class="fa-solid fa-wallet me-2"></i>FinanceTracker</a>
             <div class="d-flex align-items-center">
                 {% if current_user.is_authenticated %}
-                    <span class="text-light me-3"><i class="fa-solid fa-user me-1"></i> {{ current_user.username }} ({{ current_user.currency }})</span>
+                    <!-- ადმინის ღილაკი (გამოჩნდება მხოლოდ ადმინისთვის) -->
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.index') }}" class="btn btn-danger btn-sm me-2">
+                            <i class="fa-solid fa-user-shield me-1"></i>ადმინი
+                        </a>
+                    {% endif %}
+
+                    <span class="text-light me-3">
+                        <i class="fa-solid fa-user me-1"></i> {{ current_user.username }} ({{ current_user.currency }})
+                    </span>
+                    
                     <a href="/logout" class="btn btn-outline-danger btn-sm">გასვლა</a>
                 {% endif %}
             </div>

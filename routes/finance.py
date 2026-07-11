@@ -1,17 +1,19 @@
 # routes/finance.py
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
+from flask_login import  current_user
 from extensions import db
 from models.transaction import Transaction
 from models.category import Category
 from helpers import check_budget_status
 from datetime import datetime
+from helpers import custom_login_required,check_budget_status
+
 
 finance_bp = Blueprint('finance', __name__)
 
 # ტრანზაქციის დამატება
 @finance_bp.route('/transaction/add', methods=['POST'])
-@login_required
+@custom_login_required
 def add_transaction():
     category_id = request.form.get('category_id')
     tx_type = request.form.get('type') # 'income' ან 'expense'
@@ -42,7 +44,7 @@ def add_transaction():
 
 # Soft Delete ფუნქციონალი
 @finance_bp.route('/transaction/delete/<int:id>', methods=['POST'])
-@login_required
+@custom_login_required
 def delete_transaction(id):
     tx = Transaction.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     tx.deleted_at = datetime.utcnow() # ფიზიკურად არ იშლება, ენიჭება დრო

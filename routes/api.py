@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
-from flask_login import login_required, current_user
+from flask_login import  current_user
+from helpers import custom_login_required,check_budget_status
 from extensions import db
 from models.transaction import Transaction
 from models.category import Category
@@ -11,7 +12,7 @@ converter = CurrencyConverter()
 
 # 1. GET /api/transactions — პაგინირებული სია ფილტრებით
 @api_bp.route('/transactions', methods=['GET'])
-@login_required
+@custom_login_required
 def get_transactions():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int) # დეფოლტად 10 ჩანაწერი გვერდზე
@@ -58,7 +59,7 @@ def get_transactions():
 
 # 2. POST /api/transactions — ახალი ტრანზაქციის შექმნა
 @api_bp.route('/transactions', methods=['POST'])
-@login_required
+@custom_login_required
 def create_transaction():
     data = request.get_json() or {}
     
@@ -94,7 +95,7 @@ def create_transaction():
 
 # 3. DELETE /api/transactions/<id> — Soft Delete
 @api_bp.route('/transactions/<int:id>', methods=['DELETE'])
-@login_required
+@custom_login_required
 def api_delete_transaction(id):
     tx = Transaction.query.filter_by(id=id, user_id=current_user.id, deleted_at=None).first()
     if not tx:
@@ -108,7 +109,7 @@ def api_delete_transaction(id):
 
 # 4. GET /api/balance — მიმდინარე თვის რეზიუმე (ბალანსი)
 @api_bp.route('/balance', methods=['GET'])
-@login_required
+@custom_login_required
 def get_balance_summary():
     current_date = datetime.utcnow()
     
@@ -127,7 +128,7 @@ def get_balance_summary():
     }), 200
 # 5. GET /api/categories — მომხმარებლის პირადი კატეგორიების სია
 @api_bp.route('/categories', methods=['GET'])
-@login_required
+@custom_login_required
 def get_categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
     categories_list = [{"id": cat.id, "name": cat.name} for cat in categories]

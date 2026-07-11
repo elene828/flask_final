@@ -1,6 +1,7 @@
 # routes/dashboard.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
-from flask_login import login_required, current_user
+from flask_login import current_user
+from helpers import custom_login_required,check_budget_status
 from extensions import db
 from models.transaction import Transaction
 from models.category import Category
@@ -11,7 +12,7 @@ from services import TransactionService, CurrencyConverter
 dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/dashboard', methods=['GET'])
-@login_required
+@custom_login_required
 def index():
     user_categories = Category.query.filter_by(user_id=current_user.id).all()
     query = Transaction.query.filter_by(user_id=current_user.id, deleted_at=None)
@@ -31,7 +32,9 @@ def index():
     if end_date:
         query = query.filter(Transaction.date <= datetime.strptime(end_date, '%Y-%m-%d').date())
 
-    transactions = query.order_by(Transaction.date.desc()).all()
+    page=request.args.get('page',1,type=int)
+    pagination=query.order_by(Transaction.date.desc()).paginate(page=page,per_page=10,error_out=False)
+    transactions=pagination.items
 
     converter = CurrencyConverter()
     user_currency = current_user.currency or "GEL"
@@ -73,11 +76,12 @@ def index():
         top_3=top_3_expenses,
         budget_badges=budget_badges,
         categories=user_categories,
-        user_currency=user_currency
+        user_currency=user_currency,
+        pagination=pagination
     )
 
 @dashboard_bp.route('/transaction/add', methods=['POST'])
-@login_required
+@custom_login_required
 def add_transaction():
     category_id = request.form.get('category_id')
     tx_type = request.form.get('type')
@@ -123,7 +127,7 @@ def add_transaction():
     return redirect(url_for('dashboard.index'))
 
 @dashboard_bp.route('/transaction/delete/<int:id>', methods=['POST'])
-@login_required
+@custom_login_required
 def delete_transaction(id):
     tx = Transaction.query.filter_by(id=id, user_id=current_user.id).first()
     if tx:
@@ -133,7 +137,7 @@ def delete_transaction(id):
     return redirect(url_for('dashboard.index'))
 
 @dashboard_bp.route('/dashboard/export/csv', methods=['GET'])
-@login_required
+@custom_login_required
 def export_csv():
     transactions = Transaction.query.filter_by(user_id=current_user.id, deleted_at=None).order_by(Transaction.date.desc()).all()
     service = TransactionService()

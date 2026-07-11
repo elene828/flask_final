@@ -1,10 +1,12 @@
 # routes/auth.py
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from models.user import User
 from models.category import Category 
+from helpers import custom_login_required,check_budget_status
+
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -86,7 +88,7 @@ def register():
 
 # 3. სისტემიდან გამოსვლა (Logout)
 @auth_bp.route('/logout')
-@login_required
+@custom_login_required
 def logout():
     logout_user()
     flash('თქვენ გამოხვედით სისტემიდან.', 'success')
