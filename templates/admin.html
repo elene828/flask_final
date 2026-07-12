@@ -1,48 +1,67 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="row mb-4 align-items-center">
-    <div class="col">
-        <h2 class="fw-bold text-danger"><i class="fa-solid fa-user-shield me-2"></i> ადმინ პანელი</h2>
-        <p class="text-muted">სისტემის მომხმარებლების მართვა</p>
-    </div>
+  <div class="col">
+    <h2 class="fw-bold text-danger">
+      <i class="fa-solid fa-user-shield me-2"></i> ადმინ პანელი
+    </h2>
+    <p class="text-muted">სისტემის მომხმარებლების მართვა</p>
+  </div>
 </div>
 
 <div class="card p-3">
-    <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle">
-            <thead>
-                <tr class="text-muted small border-secondary">
-                    <th>ID</th>
-                    <th>სახელი</th>
-                    <th>Email</th>
-                    <th>სტატუსი</th>
-                    <th class="text-end">მოქმედება</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users %}
-                <tr class="border-secondary">
-                    <td>{{ u.id }}</td>
-                    <td class="fw-bold">{{ u.username }}</td>
-                    <td>{{ u.email }}</td>
-                    <td>
-                        {% if u.is_admin %}
-                            <span class="badge bg-danger">ადმინი</span>
-                        {% else %}
-                            <span class="badge bg-secondary">მომხმარებელი</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end">
-                        {% if not u.is_admin %}
-                        <form action="/admin/user/delete/{{ u.id }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">წაშლა</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle">
+      <thead>
+        <tr class="text-muted small border-secondary">
+          <th>ID</th>
+          <th>სახელი</th>
+          <th>Email</th>
+          <th>სტატუსი</th>
+          <th class="text-end">მოქმედება</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="border-secondary">
+          <td>{{ u.id }}</td>
+          <td class="fw-bold">{{ u.username }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.is_admin %}
+            <span class="badge bg-danger">ადმინი</span>
+            {% else %}
+            <span class="badge bg-secondary">მომხმარებელი</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <div class="d-flex justify-content-end gap-2">
+              {% if not u.is_admin %}
+              <!-- დაწინაურების ღილაკი -->
+              <form action="/admin/user/make-admin/{{ u.id }}" method="POST">
+                <button type="submit" class="btn btn-sm btn-outline-success">
+                  ადმინად დანიშვნა
+                </button>
+              </form>
+
+              <!-- წაშლის ღილაკი -->
+              <form
+                action="/admin/user/delete/{{ u.id }}"
+                method="POST"
+                onsubmit="
+                  return confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?');
+                "
+              >
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  წაშლა
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

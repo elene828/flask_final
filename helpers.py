@@ -20,17 +20,11 @@ def perform_conversion(amount, from_curr, to_curr):
         rates = cache.rates_json
 
     print(f"DEBUG: Converting {amount} from {from_curr} to {to_curr}")
-    print(f"DEBUG: Using Rates: {rates}") # <--- ეს გამოიტანს ტერმინალში რეალურ კურსებს
     
     # ავიღოთ კურსები (თუ კლავი არ არსებობს, დავბეჭდოთ გაფრთხილება)
     rate_from = float(rates.get(from_curr, 1.0))
     rate_to = float(rates.get(to_curr, 1.0))
     
-    if from_curr not in rates and from_curr != "GEL":
-        print(f"WARNING: {from_curr} not found in rates!")
-    if to_curr not in rates and to_curr != "GEL":
-        print(f"WARNING: {to_curr} not found in rates!")
-
     amount_in_gel = amount / rate_from
     final_amount = amount_in_gel * rate_to
     
@@ -38,36 +32,44 @@ def perform_conversion(amount, from_curr, to_curr):
 # 1. ბიუჯეტის კონტროლის ფუნქცია
 def check_budget_status(user_id, category_id, target_date=None):
     if not target_date:
-        target_date = datetime.now()
-        
-    current_month = target_date.month
-    current_year = target_date.year
-        
+        target_date = datetime.utcnow()
+    
     budget = Budget.query.filter_by(
         user_id=user_id, 
         category_id=category_id, 
-        month=current_month, 
-        year=current_year
+        month=target_date.month, 
+        year=target_date.year
     ).first()
-    
-    if not budget:
-        return {"warning": False, "percentage": 0}
 
-    total_expenses = db.session.query(db.func.sum(Transaction.amount)).filter(
+    # თუ ბიუჯეტი არ არსებობს, დააბრუნე 0-ები
+    if not budget:
+        return {"warning": False, "percentage": 0, "total_expenses": 0, "budget_amount": 0}
+
+    # 1. აუცილებლად დააინიციალიზეთ ცვლადი 0-ით
+    total_expenses = 0 
+    
+    transactions = Transaction.query.filter(
         Transaction.user_id == user_id,
         Transaction.category_id == category_id,
         Transaction.type == 'expense',
         Transaction.deleted_at == None,
-        db.func.strftime('%m', Transaction.date) == f"{current_month:02d}",
-        db.func.strftime('%Y', Transaction.date) == str(current_year)
-    ).scalar() or 0.0
+        db.func.strftime('%m', Transaction.date) == f"{target_date.month:02d}",
+        db.func.strftime('%Y', Transaction.date) == str(target_date.year)
+    ).all()
 
-    percentage = (total_expenses / budget.amount) * 100
+    # 2. ხარჯების დათვლა
+    for tx in transactions:
+        tx_curr = getattr(tx, 'currency', 'GEL')
+        total_expenses += perform_conversion(tx.amount, tx_curr, "EUR")
+
+    # 3. პროცენტის დათვლა (დაიცავით თავი ნულზე გაყოფისგან)
+    percentage = (total_expenses / budget.amount * 100) if budget.amount > 0 else 0
+    
     return {
         "warning": percentage >= 80,
         "percentage": round(percentage, 2),
-        "budget_amount": budget.amount,
-        "total_expenses": total_expenses
+        "total_expenses": round(total_expenses, 2),
+        "budget_amount": budget.amount
     }
 
 # 2. შენი Custom ავტორიზაციის დეკორატორი (პროექტის მოთხოვნისთვის)

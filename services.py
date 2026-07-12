@@ -58,7 +58,7 @@ class TransactionService:
         return output.getvalue()
 
 
-class CurrencyConverter(TransactionService): # მემკვიდრეობითობა (Inheritance)
+class CurrencyConverter: # მემკვიდრეობითობა (Inheritance)
     API_URL = "https://api.exchangerate-api.com/v4/latest/GEL"
 
     def get_rates(self) -> dict:

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from flask_login import current_user
-# მნიშვნელოვანია: იმპორტი ხდება აქედან:
+from datetime import datetime
 from helpers import custom_login_required, check_budget_status, perform_conversion
 from extensions import db
 from models.transaction import Transaction
@@ -10,6 +10,43 @@ from services import TransactionService, CurrencyConverter
 from models.budget import Budget
 
 dashboard_bp = Blueprint('dashboard', __name__)
+
+@dashboard_bp.route('/budget/set', methods=['POST'])
+@custom_login_required
+def set_budget():
+    category_id = request.form.get('category_id')
+    amount = request.form.get('amount')
+    month = request.form.get('month', datetime.utcnow().month)
+    year = request.form.get('year', datetime.utcnow().year)
+
+    if not category_id or not amount:
+        flash('გთხოვთ მიუთითოთ კატეგორია და თანხა!', 'warning')
+        return redirect(url_for('dashboard.index'))
+
+    # ვამოწმებთ, ხომ არ არსებობს უკვე ბიუჯეტი ამ თვისთვის
+    existing_budget = Budget.query.filter_by(
+        user_id=current_user.id,
+        category_id=category_id,
+        month=month,
+        year=year
+    ).first()
+
+    if existing_budget:
+        existing_budget.amount = float(amount)
+        flash('ბიუჯეტი განახლდა!', 'success')
+    else:
+        new_budget = Budget(
+            user_id=current_user.id,
+            category_id=category_id,
+            amount=float(amount),
+            month=month,
+            year=year
+        )
+        db.session.add(new_budget)
+        flash('ბიუჯეტი წარმატებით დაემატა!', 'success')
+
+    db.session.commit()
+    return redirect(url_for('dashboard.index'))
 
 
 @dashboard_bp.route('/dashboard', methods=['GET'])
@@ -62,13 +99,19 @@ def index():
     top_3_expenses = sorted(expense_totals.items(), key=lambda x: x[1], reverse=True)[:3]
 
     # ბიუჯეტის ბეჯები
+   # ბიუჯეტის ბეჯები
     budget_badges = {}
+    current_date = datetime.utcnow() # მიმდინარე თარიღი
+    
     for cat in user_categories:
         if cat.type == 'expense':
-            status = check_budget_status(current_user.id, cat.id)
+            # აქ ვუგზავნით მიმდინარე თარიღს, რომ ივლისის ბიუჯეტი იპოვოს
+            status = check_budget_status(current_user.id, cat.id, target_date=current_date)
+            
+            # ვამოწმებთ, თუ ბიუჯეტი ნაპოვნია და ლიმიტი 0-ზე მეტია
             if status.get("budget_amount", 0) > 0:
                 budget_badges[cat.name] = status
-
+                
     return render_template(
         'dashboard.html',
         transactions=transactions,
