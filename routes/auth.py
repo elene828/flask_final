@@ -1,4 +1,3 @@
-# routes/auth.py
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,7 +9,6 @@ from helpers import custom_login_required,check_budget_status
 
 auth_bp = Blueprint('auth', __name__)
 
-# 1. სისტემაში შესვლა (Login)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -22,7 +20,6 @@ def login():
         
         user = User.query.filter_by(username=username).first()
         
-        # პაროლის შემოწმება ჰეშირების გათვალისწინებით
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             flash('სისტემაში შესვლა წარმატებით განხორციელდა!', 'success')
@@ -32,7 +29,6 @@ def login():
             
     return render_template('login.html')
 
-# 2. რეგისტრაცია (Register)
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -44,13 +40,11 @@ def register():
         password = request.form.get('password')
         currency = request.form.get('currency', 'GEL')
         
-        # ვამოწმებთ უკვე არსებობს თუ არა მომხმარებელი
         user_exists = User.query.filter((User.username == username) | (User.email == email)).first()
         if user_exists:
             flash('მომხმარებელი ამ სახელით ან ელ-ფოსტით უკვე არსებობს.', 'warning')
             return redirect(url_for('auth.register'))
             
-        # ახალი მომხმარებლის შექმნა ჰეშირებული პაროლით
         new_user = User(
             username=username,
             email=email,
@@ -61,7 +55,6 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # საწყისი პირადი კატეგორიების სია (დაშორებები გასწორდა)
         default_categories = [
             {"name": "ხელფასი", "type": "income", "color": "#198754"},
             {"name": "საკვები", "type": "expense", "color": "#dc3545"},
@@ -72,7 +65,7 @@ def register():
 
         for cat in default_categories:
             new_cat = Category(
-                user_id=new_user.id, # ვუკავშირებთ ახალ მომხმარებელს
+                user_id=new_user.id,
                 name=cat["name"],
                 type=cat["type"],
                 color=cat["color"]
@@ -86,7 +79,6 @@ def register():
         
     return render_template('register.html')
 
-# 3. სისტემიდან გამოსვლა (Logout)
 @auth_bp.route('/logout')
 @custom_login_required
 def logout():

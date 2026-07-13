@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask
 from extensions import db, login_manager
 from config import Config
@@ -16,7 +15,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # ინიციალიზაცია
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -25,7 +23,6 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Blueprint-ების რეგისტრაცია
     app.register_blueprint(api_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -33,12 +30,10 @@ def create_app():
     app.register_blueprint(settings_bp)
     app.register_blueprint(category_bp)
 
-    # create_app()-ის შიგნით:
     @app.route('/')
     def home():
         return redirect(url_for('auth.login'))
 
-    # ბაზის შექმნა ავტომატურად
     with app.app_context():
         db.create_all()
 

@@ -1,4 +1,3 @@
-# services.py
 import requests
 import io
 import csv
@@ -9,7 +8,6 @@ from models.currency_cache import CurrencyCache
 
 class TransactionService:
     def get_monthly_summary(self, user_id, month, year):
-        """მიმდინარე თვის რეზიუმე (შემოსავალი, ხარჯი, ბალანსი)"""
         transactions = Transaction.query.filter(
             Transaction.user_id == user_id,
             Transaction.deleted_at == None,
@@ -27,7 +25,6 @@ class TransactionService:
         }
 
     def get_category_totals(self, user_id, start_date, end_date):
-        """კატეგორიების მიხედვით ხარჯების ჯამი მოცემულ დიაპაზონში"""
         query = Transaction.query.filter(
             Transaction.user_id == user_id,
             Transaction.deleted_at == None,
@@ -47,7 +44,6 @@ class TransactionService:
         return category_totals
 
     def export_csv(self, transactions) -> str:
-        """ტრანზაქციების სიის CSV ფორმატში ექსპორტი (სტრინგად)"""
         output = io.StringIO()
         writer = csv.writer(output)
         writer.writerow(['თარიღი', 'ტიპი', 'კატეგორია', 'თანხა', 'აღწერა'])
@@ -58,19 +54,16 @@ class TransactionService:
         return output.getvalue()
 
 
-class CurrencyConverter: # მემკვიდრეობითობა (Inheritance)
+class CurrencyConverter (TransactionService): 
     API_URL = "https://api.exchangerate-api.com/v4/latest/GEL"
 
     def get_rates(self) -> dict:
-        """ამოწმებს DB ქეშს. თუ 1 საათზე ძველია, მიაქვს ახალი API-დან და ანახლებს ბაზას"""
         cache = CurrencyCache.query.filter_by(base_currency="GEL").first()
         one_hour_ago = datetime.utcnow() - timedelta(hours=1)
 
-        # თუ ქეში არსებობს და განახლებულია ბოლო 1 საათში
         if cache and cache.updated_at > one_hour_ago:
             return cache.rates_json
 
-        # თუ ქეში არ არის ან ძველია, მივმართავთ გარე API-ს
         try:
             response = requests.get(self.API_URL, timeout=5)
             if response.status_code == 200:
@@ -96,7 +89,6 @@ class CurrencyConverter: # მემკვიდრეობითობა (Inh
         return {"GEL": 1.0, "USD": 0.37, "EUR": 0.34, "GBP": 0.29} # Fallback
 
     def convert(self, amount, from_cur, to_cur) -> float:
-        """აკონვერტირებს თანხას ნებისმიერ ორ ვალუტას შორის GEL-ის ბაზაზე"""
         if not amount:
             return 0.0
             
@@ -105,12 +97,9 @@ class CurrencyConverter: # მემკვიდრეობითობა (Inh
             
         rates = self.get_rates()
         
-        # თუ პირდაპირ GEL-იდან გადაგვაქვს
         if from_cur == "GEL":
             return round(amount * rates.get(to_cur, 1.0), 2)
             
-        # თუ სხვა ვალუტიდან გადაგვყავს GEL-ში
         amount_in_gel = amount / rates.get(from_cur, 1.0) if rates.get(from_cur) else amount
         
-        # GEL-იდან საბოლოო ვალუტაში
         return round(amount_in_gel * rates.get(to_cur, 1.0), 2)

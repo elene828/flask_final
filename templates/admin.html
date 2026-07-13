@@ -36,14 +36,12 @@
           <td class="text-end">
             <div class="d-flex justify-content-end gap-2">
               {% if not u.is_admin %}
-              <!-- დაწინაურების ღილაკი -->
               <form action="/admin/user/make-admin/{{ u.id }}" method="POST">
                 <button type="submit" class="btn btn-sm btn-outline-success">
                   ადმინად დანიშვნა
                 </button>
               </form>
 
-              <!-- წაშლის ღილაკი -->
               <form
                 action="/admin/user/delete/{{ u.id }}"
                 method="POST"

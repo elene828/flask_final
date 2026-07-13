@@ -19,7 +19,7 @@ def delete_user(id):
     user=User.query.get(id)
     if user:
         if user.is_admin:
-            flash('ადმინის ჭაშლა შეუძლებელია!','danger')
+            flash('ადმინის წაშლა შეუძლებელია!','danger')
         else:
             db.session.delete(user)
             db.session.commit()

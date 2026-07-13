@@ -8,10 +8,9 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    type = db.Column(db.String(10), nullable=False) # 'income' ან 'expense'
+    type = db.Column(db.String(10), nullable=False) 
     description = db.Column(db.String(255), nullable=True)
     date = db.Column(db.Date, default=datetime.utcnow().date, nullable=False)
     
-    # Soft Delete ფუნქციონალისთვის
     deleted_at = db.Column(db.DateTime, nullable=True)
     

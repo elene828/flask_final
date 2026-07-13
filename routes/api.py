@@ -10,17 +10,15 @@ from services import CurrencyConverter
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 converter = CurrencyConverter()
 
-# 1. GET /api/transactions — პაგინირებული სია ფილტრებით
 @api_bp.route('/transactions', methods=['GET'])
 @custom_login_required
 def get_transactions():
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int) # დეფოლტად 10 ჩანაწერი გვერდზე
+    per_page = request.args.get('per_page', 10, type=int) 
     
-    # მხოლოდ აქტიური ტრანზაქციები
+    
     query = Transaction.query.filter_by(user_id=current_user.id, deleted_at=None)
 
-    # ფილტრების წამოღება query params-იდან
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     category_id = request.args.get('category_id')
@@ -35,7 +33,6 @@ def get_transactions():
     if tx_type:
         query = query.filter_by(type=tx_type)
 
-    # პაგინაცია
     paginated_query = query.order_by(Transaction.date.desc()).paginate(page=page, per_page=per_page, error_out=False)
     
     transactions_list = []
@@ -57,17 +54,14 @@ def get_transactions():
     }), 200
 
 
-# 2. POST /api/transactions — ახალი ტრანზაქციის შექმნა
 @api_bp.route('/transactions', methods=['POST'])
 @custom_login_required
 def create_transaction():
     data = request.get_json() or {}
     
-    # სავალდებულო ველების ვალიდაცია
     if not data.get('category_id') or not data.get('type') or not data.get('amount'):
         return jsonify({"error": "Missing required fields (category_id, type, amount)"}), 400
 
-    # ვამოწმებთ, ეკუთვნის თუ არა კატეგორია ამ მომხმარებელს
     category = Category.query.filter_by(id=data['category_id'], user_id=current_user.id).first()
     if not category:
         return jsonify({"error": "Category not found or unauthorized"}), 404
@@ -93,7 +87,6 @@ def create_transaction():
     }), 201
 
 
-# 3. DELETE /api/transactions/<id> — Soft Delete
 @api_bp.route('/transactions/<int:id>', methods=['DELETE'])
 @custom_login_required
 def api_delete_transaction(id):
@@ -101,23 +94,20 @@ def api_delete_transaction(id):
     if not tx:
         return jsonify({"error": "Transaction not found or already deleted"}), 404
 
-    tx.deleted_at = datetime.utcnow() # Soft delete ლოგიკა
+    tx.deleted_at = datetime.utcnow() 
     db.session.commit()
 
     return jsonify({"message": f"Transaction {id} soft deleted successfully"}), 200
 
 
-# 4. GET /api/balance — მიმდინარე თვის რეზიუმე (ბალანსი)
 @api_bp.route('/balance', methods=['GET'])
 @custom_login_required
 def get_balance_summary():
     current_date = datetime.utcnow()
     
-    # OOP სერვისის გამოძახება
     summary = converter.get_monthly_summary(current_user.id, current_date.month, current_date.year)
     
-    # ვალუტის კონვერტაცია მომხმარებლის დეფოლტ ვალუტაზე (მაგ. თუ USD აქვს არჩეული)
-    user_currency = current_user.currency # ველი ბაზიდან
+    user_currency = current_user.currency
     converted_balance = converter.convert(summary['net_balance'], "GEL", user_currency)
 
     return jsonify({
@@ -126,7 +116,6 @@ def get_balance_summary():
         "converted_balance": converted_balance,
         "currency": user_currency
     }), 200
-# 5. GET /api/categories — მომხმარებლის პირადი კატეგორიების სია
 @api_bp.route('/categories', methods=['GET'])
 @custom_login_required
 def get_categories():

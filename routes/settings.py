@@ -1,11 +1,9 @@
-# routes/settings.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user
 from helpers import custom_login_required
 from extensions import db
 from werkzeug.security import generate_password_hash
 
-# ვქმნით ცალკე ბლუპრინტს პარამეტრებისთვის
 settings_bp = Blueprint('settings', __name__)
 
 @settings_bp.route('/settings', methods=['GET', 'POST'])
@@ -17,7 +15,6 @@ def index():
         currency = request.form.get('currency', 'GEL')
         new_password = request.form.get('password')
 
-        # 1. ძირითადი ინფორმაციის განახლება
         if username:
             current_user.username = username
         if email:
@@ -25,7 +22,6 @@ def index():
             
         current_user.currency = currency
 
-        # 2. პაროლის შეცვლა (მხოლოდ იმ შემთხვევაში, თუ ველი შეავსო)
         if new_password and new_password.strip() != "":
             current_user.password = generate_password_hash(new_password)
 

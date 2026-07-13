@@ -7,5 +7,5 @@ class Budget(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    month = db.Column(db.Integer, nullable=False) # მაგალითად: 1 - 12
-    year = db.Column(db.Integer, nullable=False)  # მაგალითად: 2026
+    month = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.Integer, nullable=False)  

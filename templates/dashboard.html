@@ -1,7 +1,6 @@
 {% extends 'base.html' %} 
 {% block content %}
 
-<!-- ზედა სტატისტიკის რიგი -->
 <div class="row g-3 mb-4">
   <div class="col-md-4">
     <div class="card p-3 text-white {% if balance >= 0 %}gradient-income{% else %}gradient-expense{% endif %}">
@@ -14,7 +13,7 @@
 
   <div class="col-md-4">
     <div class="card p-3">
-      <h6 class="text-uppercase text-muted">ბიუჯეტის ბეჯები (კატეგორიები)</h6>
+      <h6 class="text-uppercase text-muted">ბიუჯეტის ლიმიტის პროგრესი</h6>
       <div class="d-flex flex-wrap gap-1 mt-2">
         {% for cat_name, status in budget_badges.items() %}
         <span class="badge {% if status.warning %}bg-danger text-white{% else %}bg-secondary text-light{% endif %} p-2">
@@ -46,7 +45,6 @@
   </div>
 </div>
 
-<!-- ფილტრაციის პანელი -->
 <div class="card p-3 mb-4">
   <form method="GET" action="/dashboard" class="row g-2 align-items-end">
     <div class="col-md-2">
@@ -92,14 +90,11 @@
   </form>
 </div>
 
-<!-- მთავარი კონტენტი (ფორმები და ცხრილი) -->
 <div class="row g-4">
   
-  <!-- მარცხენა სვეტი: ტრანზაქციის და ბიუჯეტის ფორმები -->
   <div class="col-md-4">
     
     
-    <!-- ტრანზაქციის დამატების ბლოკი -->
     <div class="card p-3 mb-4">
       <h5 class="mb-3 text-success fw-bold">
         <i class="fa-solid fa-plus-circle me-1"></i> ახალი ტრანზაქცია
@@ -120,7 +115,7 @@
             <option value="{{ cat.id }}">{{ cat.name }}</option>
             {% endfor %}
             <option value="NEW_CATEGORY_TRIGGER" class="text-primary fw-bold">
-              ➕ ახალი კატეგორია...
+               + ახალი კატეგორია...
             </option>
           </select>
         </div>
@@ -150,7 +145,6 @@
       </form>
     </div>
 
-    <!-- 🎯 ახალი: ბიუჯეტის დაყენების ბლოკი -->
     <div class="card p-3">
       <h5 class="mb-3 text-primary fw-bold">
         <i class="fa-solid fa-bullseye me-1"></i> ბიუჯეტის ლიმიტი
@@ -160,7 +154,6 @@
           <label class="form-label small">კატეგორია</label>
           <select name="category_id" class="form-select bg-dark text-light border-secondary" required>
             <option value="" disabled selected>აირჩიეთ კატეგორია</option>
-            <!-- სასურველია ბიუჯეტი მხოლოდ ხარჯებზე დაწესდეს -->
             {% for cat in categories if cat.type == 'expense' %}
             <option value="{{ cat.id }}">{{ cat.name }}</option>
             {% endfor %}
@@ -178,7 +171,6 @@
     
   </div>
 
-  <!-- მარჯვენა სვეტი: ტრანზაქციების ცხრილი -->
   <div class="col-md-8">
     <div class="card p-3">
       <h5 class="mb-3 fw-bold">
@@ -229,7 +221,6 @@
         </table>
       </div>
       
-      <!-- პაგინაცია -->
       {% if pagination and pagination.pages > 1 %}
       <nav class="mt-3">
         <ul class="pagination pagination-sm justify-content-center m-0">
@@ -260,7 +251,6 @@
   </div>
 </div>
 
-<!-- კატეგორიის სწრაფი დამატების ფანჯარა -->
 <div class="modal fade" id="quickCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content text-dark">
@@ -301,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         categorySelect.addEventListener('change', function() {
             if (this.value === 'NEW_CATEGORY_TRIGGER') {
                 quickModal.show();
-                this.value = ''; // აბრუნებს სელექტს საწყის პოზიციაზე
+                this.value = ''; 
             }
         });
     }
