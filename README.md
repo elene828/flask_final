@@ -76,14 +76,6 @@ All API endpoints require an authenticated user (the project uses session-based 
 
 Feel free to open issues or submit PRs. For quick local testing, ensure you have a virtual env and `requirements.txt` installed.
 
-## License
-
-MIT
-# Finance Tracker
-
-## About the project
-This project is a Flask-based personal finance tracker that helps users manage transactions, categories, budgets, and currency conversion in a simple web app.
-
 ## Setup
 1. Create and activate a virtual environment:
    - `python -m venv .venv`
