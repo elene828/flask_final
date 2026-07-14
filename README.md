@@ -14,35 +14,6 @@ Lightweight personal finance tracker built with Flask. Provides user authenticat
 - Flask-Login, Flask-SQLAlchemy
 - SQLite by default (configurable via `DATABASE_URL`)
 
-## Quickstart
-
-1. Create a virtual environment and install dependencies:
-
-```bash
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-2. Create a `.env` file at the project root (optional) and set:
-
-- `SECRET_KEY` — application secret
-- `DATABASE_URL` — SQLAlchemy database URL (defaults to `sqlite:///finance.db`)
-
-Example `.env`:
-
-```
-SECRET_KEY=replace-with-a-secret
-DATABASE_URL=sqlite:///finance.db
-```
-
-3. Run the app (development):
-
-```bash
-python app.py
-```
-
-The app will create the database tables automatically on first run.
 
 ## API
 
@@ -75,6 +46,35 @@ All API endpoints require an authenticated user (the project uses session-based 
 ## Contributing
 
 Feel free to open issues or submit PRs. For quick local testing, ensure you have a virtual env and `requirements.txt` installed.
+## Quickstart
+
+1. Create a virtual environment and install dependencies:
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+2. Create a `.env` file at the project root (optional) and set:
+
+- `SECRET_KEY` — application secret
+- `DATABASE_URL` — SQLAlchemy database URL (defaults to `sqlite:///finance.db`)
+
+Example `.env`:
+
+```
+SECRET_KEY=replace-with-a-secret
+DATABASE_URL=sqlite:///finance.db
+```
+3. Run the app (development):
+
+```bash
+python app.py
+```
+
+The app will create the database tables automatically on first run.
+
 
 ## Setup
 1. Create and activate a virtual environment:
